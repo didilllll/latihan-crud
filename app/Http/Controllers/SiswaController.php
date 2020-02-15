@@ -14,7 +14,10 @@ class SiswaController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-
+    public function __construct()
+    {
+        return $this->middleware('auth');
+    }
 
     public function index()
     {
@@ -32,7 +35,8 @@ class SiswaController extends Controller
      */
     public function create()
     {
-
+        $kelas = Kelas::all();
+        $mapel = Mapel::all();
     return view('siswa.create', compact('kelas','mapel'));
     }
 
@@ -79,9 +83,10 @@ class SiswaController extends Controller
     {
         //
         $kelas = Kelas::all();
-        $siswa= Siswa::findOrFail();
+        $siswa = Siswa::findOrFail($id);
         $mapel = Mapel::all();
-        return view('siswa.edit', compact('siswa', 'kelas','mapel'));
+        $selected = $siswa->mapel->pluck('id')->toArray();
+        return view('siswa.edit', compact('siswa', 'selected','kelas','mapel'));
     }
 
     /**
@@ -113,7 +118,11 @@ class SiswaController extends Controller
     public function destroy($id)
     {
         //
+
+
         $siswa = Siswa::findOrFail($id)->delete();
+        $siswa->mapel()->detach();
+        $siswa->delete();
         return redirect()->route('siswa.index');
     }
 }
